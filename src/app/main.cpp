@@ -42,7 +42,7 @@ pair<int, vector<P>> optimize(const vector<Task> &tasks,
 
   priority_queue<pair<int, pair<int, int>>> eque; // len, vu
   repeat(i, M) {
-    eque.emplace(-taskis[i]->src.distM(P{400, 400}), // * 100 + rand(0, 99)
+    eque.emplace(-taskis[i]->src.distM(P{400, 400}), // * 100 - rand(0, 99)
                  make_pair(i * 2, kBaseIdx));
     eque.emplace(-taskis[i]->src.distM(taskis[i]->dst), // * 100 + rand(0, 99)
                  make_pair(i * 2, i * 2 + 1));
@@ -141,6 +141,7 @@ int main() {
 
   {
 
+    int loopcount = 0;
     Timer timer;
     int temperature = 0;
     int tl = 100;
@@ -167,7 +168,9 @@ int main() {
         tl += 100;
         clog << "score: " << best.first << endl;
       }
+      ++loopcount;
     }
+    clog << "loopcount: " << loopcount << endl;
   }
 
   best_idxs.resize(M);

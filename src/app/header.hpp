@@ -29,7 +29,25 @@ void bye(string s, int code = 0) {
   cout << s << endl;
   exit(code);
 }
-mt19937_64 randdev(8901016);
+struct XorShift {
+  using result_type = uint64_t;
+  result_type x_;
+  XorShift(result_type x = 88172645463325252ull) : x_(x){};
+  static constexpr inline result_type min() { return 0ull; }
+  static constexpr inline result_type max() {
+    return numeric_limits<result_type>::max();
+  }
+  inline result_type operator()() {
+    x_ ^= x_ << 7;
+    return x_ ^= x_ >> 9;
+  }
+  inline void discard(unsigned long long z) {
+    while (z--)
+      operator()();
+  }
+};
+XorShift randdev;
+// mt19937_64 randdev(8901016);
 template <typename T, typename Random = decltype(randdev),
           typename enable_if<is_integral<T>::value>::type * = nullptr>
 inline T rand(T l, T h, Random &rand = randdev) {
