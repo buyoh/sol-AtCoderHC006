@@ -69,15 +69,16 @@ pair<int, vector<P>> optimize(const vector<Task> &tasks,
   }
 
   vector<int> visited;
+  // せめて最初の1つはsrcを選びたいが…
   optimize_dfs(kBaseIdx, -1, graph, visited);
 
-  vector<P> route;
+  vector<int> routei;
   vector<bool> picked(M, false);
   vector<int> reroute_idxs;
 
   P curr{400, 400};
-  int total_cost = 0;
-  route.push_back(curr);
+  routei.push_back(M * 2);
+  // route.push_back(curr);
   for (auto i : visited) {
     int ti = i >> 1;
     bool isDst = i & 1;
@@ -95,23 +96,58 @@ pair<int, vector<P>> optimize(const vector<Task> &tasks,
       next = taskis[ti]->src;
       picked[ti] = true;
     }
-    total_cost += curr.distM(next);
     curr = next;
-    route.push_back(curr);
+    // route.push_back(curr);
+    routei.push_back(i);
   }
+  routei.push_back(M * 2);
 
+  // vector<int> rereroute_idxs;
   for (auto i : reroute_idxs) {
     int ti = i >> 1;
-    bool isDst = i & 1;
+    // bool isDst = i & 1;
 
-    assert(picked[ti]);
-    P next = taskis[ti]->dst;
-    total_cost += curr.distM(next);
-    curr = next;
-    route.push_back(curr);
+    P p = taskis[ti]->dst;
+
+    int pi = 0;
+    while (routei[pi] != ti * 2)
+      ++pi;
+    int besti = -1; // besti の後に i を挿入する
+    // int bestcost = numeric_limits<int>::max() / 2;
+    for (; routei[pi] != M * 2; ++pi) {
+      //
+      int bi = routei[pi];
+      int ai = routei[pi + 1];
+      P b = (bi & 1) ? taskis[bi / 2]->dst : taskis[bi / 2]->src;
+      P a = ai == M * 2 ? P{400, 400}
+                        : (ai & 1) ? taskis[ai / 2]->dst : taskis[ai / 2]->src;
+      int cost = b.distM(p) + p.distM(a) - b.distM(a);
+      if (cost == 0) {
+        besti = pi;
+        break;
+      }
+    }
+    if (besti == -1) {
+      besti = pi - 1;
+    }
+    auto it = routei.begin();
+    advance(it, pi + 1);
+    routei.insert(it, i);
+    assert(*routei.rbegin() == M * 2);
   }
-  route.push_back(P{400, 400});
-  total_cost += curr.distM(P{400, 400});
+
+  vector<P> route;
+  int total_cost = 0;
+  route.reserve(routei.size());
+  {
+    P c{400, 400};
+    for (auto i : routei) {
+      P p = i == M * 2 ? P{400, 400}
+                       : (i & 1) ? taskis[i / 2]->dst : taskis[i / 2]->src;
+      total_cost += c.distM(p);
+      route.push_back(p);
+    }
+  }
   return make_pair(total_cost, route);
 }
 

@@ -359,3 +359,34 @@ public:
 inline std::ostream &operator<<(std::ostream &o, const Timer<> &t) {
   return o << (long long)t.toc();
 }
+
+class Graph2d {
+public:
+  using W_T = int;
+  int n;
+  vector<W_T> matrix;
+
+  explicit Graph2d(int size) : n(size), matrix(size * size){};
+
+  inline int size() const { return n; }
+  void resize(int s) {
+    n = s;
+    matrix.resize(n * n);
+  }
+  void resize(int s, W_T val) {
+    n = s;
+    matrix.resize(n * n, val);
+  }
+
+  inline W_T &at(int y, int x) { return matrix[y * n + x]; }
+  inline W_T &operator()(int y, int x) { return matrix[y * n + x]; }
+  inline W_T at(int y, int x) const { return matrix[y * n + x]; }
+  inline W_T operator()(int y, int x) const { return matrix[y * n + x]; }
+
+  inline void connect(int u, int v, W_T dist = 1) {
+    at(u, v) = at(v, u) = dist;
+  }
+  inline void connect_d(int from, int to, W_T dist = 1) { // directedEdge u->v
+    at(from, to) = dist;
+  }
+};
